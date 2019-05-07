@@ -286,6 +286,36 @@ int* prepareCtrlCache(int* ctrls, int ctrlInd, int numCtrls, int addTarg) {
     return ctrlCache;
 }
 
+
+void local_fetchCircuitDescriptions() {
+    
+    int numCircuits;
+    int* numOpsPerCircuit;
+    WSGetInteger32List(stdlink, &numOpsPerCircuit, &numCircuits);
+    
+    int totalNumOps;
+    int* allOpsCodes;
+    WSGetInteger32List(stdlink, &allOpCodes, &totalNumOps);
+    
+    int totalNumCtrls;
+    int *allCtrls;
+    int *numCtrlsPerOp;
+    WSGetInteger32List(stdlink, &allCtrls, &totalNumCtrls);
+    WSGetInteger32List(stdlink, &numCtrlsPerOp, &totalNumOps);
+    
+    int totalNumTargs;
+    int *allTargs;
+    int *numTargsPerOp;
+    WSGetInteger32List(stdlink, &allTargs, &totalNumTargs);
+    WSGetInteger32List(stdlink, &numTargsPerOp, &totalNumOps);
+    
+    int totalNumParams;
+    qreal *allParams;
+    int *numParamsPerOp;
+    WSGetReal64List(stdlink, &allParams, &totalNumParams);
+    WSGetInteger32List(stdlink, &numParamsPerOp, &totalNumOps);
+}
+
 /** 
  * Applies a given circuit to the identified qureg.
  * The circuit is expressed as lists of opcodes (identifying gates),
@@ -302,6 +332,10 @@ int* prepareCtrlCache(int* ctrls, int ctrlInd, int numCtrls, int addTarg) {
  * destroyed.
  */
 void internal_applyCircuit(int id) {
+    
+    // @TODO: move below extracting out of this code 
+    // OH WAIT: MEASUREMENT RESULT RETURNING!!! hmmm
+    // make the inner call just return the measurement results as a list
     
     // get arguments from MMA link
     int numOps;
