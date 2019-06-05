@@ -18,7 +18,7 @@ OS = LINUX
 EXE = quest_link
 
 # space-separated names (no file type) of all user source files (.c or .cpp) in the root directory
-SOURCES = quest_link quest_templates.tm
+SOURCES = quest_link quest_templates.tm quest_viennacl
 
 # path to QuEST library from root directory
 QUEST_DIR = QuEST
@@ -27,7 +27,7 @@ QUEST_DIR = QuEST
 WSTP_DIR = WSTP
 
 # path to ViennaCL library from root directory
-VIENNACL_DIR = VCL
+VIENNACL_DIR = ViennaCL
 
 # compiler to use, which should support both C and C++, to be wrapped by GPU/MPI compilers
 COMPILER = gcc-6
@@ -38,7 +38,7 @@ COMPILER_TYPE = GNU
 # hardwares to target: 1 means use, 0 means don't use
 MULTITHREADED = 0
 DISTRIBUTED = 0
-GPUACCELERATED = 0
+GPUACCELERATED = 1
 
 # GPU hardware dependent, lookup at https://developer.nvidia.com/cuda-gpus, write without fullstop
 GPU_COMPUTE_CAPABILITY = 61
@@ -156,7 +156,10 @@ endif
 
 LIBS = -lm
 ifeq ($(OS), MACOSX)
-    LIBS += -lc++ $(WSTP_DIR)/macosx_libWSTPi4.36.a -framework Foundation
+    LIBS += -lc++ $(WSTP_DIR)/macosx_libWSTPi4.36.a
+    ifeq ($(GPUACCELERATED), 0)
+        LIBS += -framework Foundation
+    endif
 else ifeq ($(OS), LINUX)
     ifeq ($(GPUACCELERATED), 0)
         LIBS += -Wl,--no-as-needed

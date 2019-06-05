@@ -20,10 +20,22 @@
 
 
 #include "wstp.h"
+#include <QuEST.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <QuEST.h>
+
+#include "quest_viennacl.h"
+
+
+
+// @@@@ TESTING 
+
+void somefunc() {
+    mytest();
+}
+
+
 
 /*
  * PI constant needed for (multiControlled) sGate and tGate
