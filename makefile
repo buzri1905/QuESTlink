@@ -23,11 +23,14 @@ SOURCES = quest_link quest_templates.tm
 # path to QuEST library from root directory
 QUEST_DIR = QuEST
 
-# path to WSTP libs from root directory 
+# path to WSTP library from root directory 
 WSTP_DIR = WSTP
 
+# path to ViennaCL library from root directory
+VIENNACL_DIR = VCL
+
 # compiler to use, which should support both C and C++, to be wrapped by GPU/MPI compilers
-COMPILER = gcc-8
+COMPILER = gcc-6
 
 # type of above compiler, one of {GNU, INTEL, CLANG}, used for setting compiler flags
 COMPILER_TYPE = GNU
@@ -175,7 +178,7 @@ ifeq ($(GPUACCELERATED), 1)
 else
     QUEST_INNER_DIR = $(QUEST_SRC_DIR)/CPU
 endif
-QUEST_INCLUDE = -I${QUEST_INCLUDE_DIR} -I$(QUEST_INNER_DIR) -I$(QUEST_COMMON_DIR) -I$(WSTP_DIR)
+QUEST_INCLUDE = -I${QUEST_INCLUDE_DIR} -I$(QUEST_INNER_DIR) -I$(QUEST_COMMON_DIR) -I$(WSTP_DIR) -I$(VIENNACL_DIR)
 
 
 #
@@ -200,6 +203,14 @@ MPI_COMPILER = mpicc
 #	- INTEL compilers of version < ? won't recognise -diad-disable and -cpu-dispatch
 #	- CLANG compilers don't support openmp (threading) at all
 
+# ViennaCL flag 
+ifeq ($(GPUACCELERATED), 1)
+    VCL_FLAG = -DVIENNACL_WITH_CUDA
+else ifeq ($(MULTITHREADED), 1)
+    VCL_FLAG = -DVIENNACL_WITH_OPENMP
+else
+    VCL_FLAG =
+endif
 
 # threading flag
 ifeq ($(MULTITHREADED), 1)
@@ -213,17 +224,17 @@ else
 endif
 
 # c
-C_CLANG_FLAGS = -O2 -std=c99 -mavx -Wall -DQuEST_PREC=$(PRECISION)
-C_GNU_FLAGS = -O2 -std=c99 -mavx -Wall -DQuEST_PREC=$(PRECISION) $(THREAD_FLAGS)
-C_INTEL_FLAGS = -O2 -std=c99 -fprotect-parens -Wall -xAVX -axCORE-AVX2 -diag-disable -cpu-dispatch -DQuEST_PREC=$(PRECISION) $(THREAD_FLAGS)
+C_CLANG_FLAGS = -O2 -std=c99 -mavx -Wall -DQuEST_PREC=$(PRECISION) $(VCL_FLAG)
+C_GNU_FLAGS = -O2 -std=c99 -mavx -Wall -DQuEST_PREC=$(PRECISION) $(THREAD_FLAGS) $(VCL_FLAG)
+C_INTEL_FLAGS = -O2 -std=c99 -fprotect-parens -Wall -xAVX -axCORE-AVX2 -diag-disable -cpu-dispatch -DQuEST_PREC=$(PRECISION) $(THREAD_FLAGS) $(VCL_FLAG)
 
 # c++
-CPP_CLANG_FLAGS = -O2 -std=c++11 -mavx -Wall -DQuEST_PREC=$(PRECISION)
-CPP_GNU_FLAGS = -O2 -std=c++11 -mavx -Wall -DQuEST_PREC=$(PRECISION) $(THREAD_FLAGS)
-CPP_INTEL_FLAGS = -O2 -std=c++11 -fprotect-parens -Wall -xAVX -axCORE-AVX2 -diag-disable -cpu-dispatch -DQuEST_PREC=$(PRECISION) $(THREAD_FLAGS)
+CPP_CLANG_FLAGS = -O2 -std=c++11 -mavx -Wall -DQuEST_PREC=$(PRECISION) $(VCL_FLAG)
+CPP_GNU_FLAGS = -O2 -std=c++11 -mavx -Wall -DQuEST_PREC=$(PRECISION) $(THREAD_FLAGS) $(VCL_FLAG)
+CPP_INTEL_FLAGS = -O2 -std=c++11 -fprotect-parens -Wall -xAVX -axCORE-AVX2 -diag-disable -cpu-dispatch -DQuEST_PREC=$(PRECISION) $(THREAD_FLAGS) $(VCL_FLAG)
 
 # wrappers
-CPP_CUDA_FLAGS = -O2 -arch=compute_$(GPU_COMPUTE_CAPABILITY) -code=sm_$(GPU_COMPUTE_CAPABILITY) -DQuEST_PREC=$(PRECISION) -ccbin $(COMPILER)
+CPP_CUDA_FLAGS = -O2 -arch=compute_$(GPU_COMPUTE_CAPABILITY) -code=sm_$(GPU_COMPUTE_CAPABILITY) -DQuEST_PREC=$(PRECISION) -ccbin $(COMPILER) $(VCL_FLAG)
 
 # choose c/c++ flags based on compiler type
 ifeq ($(COMPILER_TYPE), CLANG)
