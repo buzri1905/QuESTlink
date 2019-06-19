@@ -27,16 +27,6 @@
 
 #include "quest_viennacl.h"
 
-
-
-// @@@@ TESTING 
-
-void somefunc() {
-    mytest();
-}
-
-
-
 /*
  * PI constant needed for (multiControlled) sGate and tGate
  */
@@ -874,6 +864,12 @@ void callable_getAllQuregs(void) {
 
 
 int main(int argc, char* argv[]) {
+    
+    
+    // @@@ TESTING 
+    mytest();
+    
+    
     
     // create the single, global QuEST execution env
     env = createQuESTEnv();
